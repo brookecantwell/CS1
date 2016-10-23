@@ -1,0 +1,223 @@
+Script started on Thu 17 Dec 2015 07:58:45 PM EST
+]0;brookecantwell@storm:~/CISC1600/final[brookecantwell@storm final]$ pwd
+/home/students/FALL15/brookecantwell/CISC1600/final
+]0;brookecantwell@storm:~/CISC1600/final[brookecantwell@storm final]$ cat final.cpp
+/* 
+ * Brooke Cantwell
+ *
+ * CISC1600 Final Exam
+ *
+ * 17 December 2015
+ *
+ * Generate a random number between a lower
+ * and upper bound set by the user 100 times
+ * and display the frequency each number
+ * occured with a horizontal bar chart
+ * representing the frequency of every 
+ * number between the lower and upper bounds.
+ *
+ */
+
+#include <iostream>
+#include <cstdlib>
+#include <ctime>
+
+using namespace std;
+
+main() {
+
+	//local variables
+
+	int rNum;
+	int lower, upper;	
+	const int REPEAT_TIMES= 100;
+	char chart;
+
+	//function declarations
+
+	void getBounds(int&, int&);
+	int getRandomNumber (int, int);
+	void updateArray (int[ ], int);
+	void summaryInformation(const int[ ], int, int);
+	void displayChart (const int [ ], int, int);
+
+	//seed for srand
+
+	srand (time(0) );
+
+	//function call for getBounds(), user inputs upper and lower bounds
+
+	getBounds(lower, upper);
+
+	//calculate the size of the array using the user input upper bound
+
+	const int SIZE = upper + 1;
+
+	//initialize all elements of counterArray[] to 0
+
+	int counterArray[SIZE] = {0};
+
+	//repeat getRandomNumber() and updateArray() a set number of times, generating 
+	//a random number and incrementing the value of counterArray[rNum] each time
+
+	for (int i = 0; i < REPEAT_TIMES; i++) {
+		rNum = getRandomNumber(lower, upper);
+		updateArray (counterArray, rNum);
+	}
+
+	//function call for summaryInformation (displays frequency of all numbers between
+	//the upper and lower bounds
+
+	summaryInformation(counterArray, lower, upper);
+
+	//ask the user if they want to see the horizontal bar chart
+
+	cout << endl << "To see a horizontal bar chart of the results, enter 'C' or 'c' (enter any other character to quit the program): ";
+	cin >> chart;
+	
+	switch (chart) {
+		case 'C':
+		case 'c':
+			//if the user enters 'C' or 'c' function call for displayChart()
+			//outputting the bar chart
+			displayChart (counterArray, lower, upper);
+			break;
+		default:
+			cout << "OK! Goodbye." << endl;
+	}
+
+}
+]0;brookecantwell@storm:~/CISC1600/final[brookecantwell@storm final]$ cat finalFunction.cpp
+/* 
+ * Brooke Cantwell
+ *
+ * CISC1600 Final Exam
+ *
+ * 17 December 2015
+ *
+ * Functions used in final.cpp
+ *
+ */
+
+#include <iostream>
+#include <cstdlib>
+#include <ctime>
+
+using namespace std;
+
+
+//function definition for getBounds(), prompts the user to input upper and lower bounds, and if the
+//lower bound given by the user is less than zero alert the user and prompt them for another lower bound
+void getBounds (int&lower, int&upper) {
+
+	cout << "Enter the lower bound for the range of possible numbers: ";
+	cin >> lower;
+
+	while (lower < 0) {
+		cout << "The minimum value for the lower bound is 0. Enter lower bound: ";
+		cin >> lower;
+	}
+	
+	cout << "Enter the upper bound for the range of possible numbers: ";
+	cin >> upper;
+}
+
+//function definition for getRandomNumber(), generates a random number between the upper and lower
+//bounds (inclusive) input by the user
+int getRandomNumber(int lower, int upper) {
+	int rNum;
+	
+	rNum = rand() % (upper - lower + 1) + lower;
+
+	return(rNum);
+}
+
+//function definition for updateArray(), use the random number that was generated as the index of the
+//array to increment the value to represent frequency
+void updateArray (int counterArray[ ], int rNum) {
+	
+	counterArray[rNum]++;
+
+}
+
+//function definition for summaryInformation(), displays the number of times every number between the
+//upper and lower bounds was generated
+void summaryInformation (const int counterArray[ ], int lower, int upper) {
+
+	cout << "Summary Information: " << endl << endl;
+
+	for (int i = lower; i <= upper; i++) {
+		cout << "The number " << i << " was generated " << counterArray[i] << " times." << endl;
+	}
+}
+
+//function definition for displayChart(), outputs the frequency of the numbers as a bar chart
+void displayChart (const int counterArray[ ], int lower, int upper) {
+	
+
+	cout << endl << "Number\tFrequency" << endl << endl;
+	for (int i = lower; i <= upper; i++) {
+		cout << i << '\t';
+		for (int j = 0; j < counterArray[i]; j++) {
+			cout << '*';
+		}
+	cout << endl;
+	}
+}
+]0;brookecantwell@storm:~/CISC1600/final[brookecantwell@storm final]$ g++ final.cpp finalFunction.cpp -o final
+]0;brookecantwell@storm:~/CISC1600/final[brookecantwell@storm final]$ ./final
+Enter the lower bound for the range of possible numbers: 10
+Enter the upper bound for the range of possible numbers: 30
+Summary Information: 
+
+The number 10 was generated 5 times.
+The number 11 was generated 4 times.
+The number 12 was generated 4 times.
+The number 13 was generated 3 times.
+The number 14 was generated 3 times.
+The number 15 was generated 7 times.
+The number 16 was generated 4 times.
+The number 17 was generated 4 times.
+The number 18 was generated 4 times.
+The number 19 was generated 4 times.
+The number 20 was generated 4 times.
+The number 21 was generated 9 times.
+The number 22 was generated 9 times.
+The number 23 was generated 1 times.
+The number 24 was generated 2 times.
+The number 25 was generated 5 times.
+The number 26 was generated 7 times.
+The number 27 was generated 5 times.
+The number 28 was generated 2 times.
+The number 29 was generated 5 times.
+The number 30 was generated 9 times.
+
+To see a horizontal bar chart of the results, enter 'C' or 'c' (enter any other character to quit the program): c
+
+Number	Frequency
+
+10	*****
+11	****
+12	****
+13	***
+14	***
+15	*******
+16	****
+17	****
+18	****
+19	****
+20	****
+21	*********
+22	*********
+23	*
+24	**
+25	*****
+26	*******
+27	*****
+28	**
+29	*****
+30	*********
+]0;brookecantwell@storm:~/CISC1600/final[brookecantwell@storm final]$ exit
+exit
+
+Script done on Thu 17 Dec 2015 07:59:32 PM EST

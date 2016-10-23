@@ -1,0 +1,137 @@
+/*
+ * numbers.cpp
+ *
+ * Numbers Game
+ *
+ * Prompts the user for three numbers,
+ * calculate the sum, calculate the
+ * average, display the sum and average
+ * and output the largest number.
+ *
+ * Brooke Cantwell
+ *
+ * 1 October 2015
+ */
+
+#include <iostream>
+#include <iomanip>
+
+using namespace std;
+
+main () {
+	
+	// Declare Local Variables
+
+	int num1, num2, num3, sum, largest, smallest, sumAnswer, largestAnswer, smallestAnswer, score = 0;
+	float average, averageAnswer;
+	string gameAnswer, firstName;
+
+	std::cout.precision(5);
+	std::cin.precision(5);
+
+	// Begin user interaction, ask the user if they want to playt the game
+
+	cout << "Welcome to Math Challenge CISC1600!\nMy name is Brooke and I challenge you to test your math skills.\nDo you accept my challenge (yes/no)?\n";
+	cin >> gameAnswer;
+
+	// If the user says no, quit the program, if not continue with the game
+
+	if (gameAnswer == "no" || gameAnswer == "No" || gameAnswer == "NO")
+		cout << "Too bad";
+	else {
+		cout << "What is your first name?\n";
+		cin >> firstName;
+
+		cout << "Thank you " << firstName << ". Here we go!\n";
+
+		cout << "Please enter three numbers seperated by spaces.\n";
+		cin >> num1 >> num2 >> num3;
+	
+
+		// If the numbers aren't within the appropriate range alert the user and quit the program
+		
+		if (num1 > 100 || num2 > 100 || num3 > 100) {
+			cout << "You must choose numbers between 1 and 100.\n";
+		}	
+	
+		// If the numbers are in the acceptable range continue the program
+		
+		else {
+			// GAME STARTS HERE
+			
+			cout << "Thank you " << firstName <<", you entered: " << num1 << ", " << num2 << ", " << num3;
+
+			// Find the average and sum of the numbers
+
+			sum = num1 + num2 + num3;
+			average = (float) sum / 3;
+
+			// Calculate the largest and smallest numbers
+
+			if (num1 > num2 && num1 > num3)
+				largest = num1;
+			else
+			if (num2 > num1 && num2 > num3)
+				largest = num2;
+			else
+			if (num3 > num2 && num3 > num1)
+				largest = num3;
+
+			if (num1 < num2 && num1 < num3)
+				smallest = num1;
+			else
+			if (num2 < num1 && num2 < num3)
+				smallest = num2;
+			else
+			if (num3 < num2 && num3 < num1)
+				smallest = num3;
+
+			// Prompt the user to answer questions and check their answers, increase the score for correct answers
+
+			cout << "\nGuess the sum? ";
+			cin >> sumAnswer;
+			if (sumAnswer == sum)
+				score++;
+
+			cout << "Guess the average? (Maximum 6 Digits)";
+			cin >> averageAnswer;
+			if (average - averageAnswer < 0.001 || averageAnswer - average < 0.001)
+				score++;
+
+			cout << "Guess the largest? ";
+			cin >> largestAnswer;
+			if (largestAnswer == largest)
+				score++;
+
+			cout << "Guess the smallest? ";
+			cin >> smallestAnswer;
+			if (smallestAnswer == smallest)
+				score++;
+
+			// Display answers and user answers to check their work
+
+			cout << "Sum: " << sum << "\n";
+			cout << "Average: " << average << "\n\n";
+
+			cout << "Your score is: " << score << "\n\n";
+
+			cout << "Check your answers:\n\n";
+
+			cout << "Question 1: Guess the sum.\nAnswer: " << sum << "\n" << "Your answer: " << sumAnswer << "\n";
+			cout << "Question 2: Guess the average.\nAnswer: " << average << "\n" << "Your answer: " << averageAnswer << "\n";
+			cout << "Question 3: Guess the largest.\nAnswer: " << largest << "\n" << "Your answer: " << largestAnswer << "\n";
+			cout << "Question 4: Guess the smallest.\nAnswer: " << smallest << "\n" << "Your answer: " <<smallestAnswer << "\n";
+
+			// Display message depending on user score
+
+			if (score == 4)
+				cout << "Brilliant! You got all of the questions right!\n";
+			else
+			if (score >= 3)
+				cout << "Good job! You got " << score << " questions right!\n";
+			else
+				cout << "Consider a math tutor! You only got " << score << " out of 4 questions right!\n";
+			
+		}
+	}
+}

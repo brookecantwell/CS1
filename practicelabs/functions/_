@@ -1,0 +1,36 @@
+#include <iostream>
+
+using namespace std;
+
+main () {
+
+	char answer, convertTo, chartAnswer;
+	int result;
+	int startingTemp;
+
+	int toCelcius(int startingTemp);
+	int toFarenheit(int startingTemp);	
+
+	cout << "Would you like to convert a temperature? ";
+	cin >> answer;
+
+	if (answer == 'N' || answer == 'n')
+		cout << "OK";
+	else {
+		cout << "Would you like to convert to (F)arenheit or (C)elsius? ";
+		cin >> convertTo;
+
+		switch(convertTo) {
+			case 'F':
+			case 'f':
+				result = toFarenheit(startingTemp);
+				break;
+			case 'C':
+			case 'c':
+				result = toCelcius(startingTemp);
+				break;
+		}
+	}
+	
+
+}

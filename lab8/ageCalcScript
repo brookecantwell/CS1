@@ -1,0 +1,351 @@
+Script started on Fri 27 Nov 2015 10:31:35 PM EST
+]0;brookecantwell@storm:~/CISC1600/lab8[brookecantwell@storm lab8]$ pwd
+/home/students/FALL15/brookecantwell/CISC1600/lab8
+]0;brookecantwell@storm:~/CISC1600/lab8[brookecantwell@storm lab8]$ cat age.cpp
+/* 
+ * age.cpp
+ *
+ * Lab #8 - How old are you really?
+ *
+ * Brooke Cantwell
+ * 
+ * 27 November 2015
+ *
+ * Simple age calculator that asks the user for
+ * the current date, their birthday and calculates
+ * their age in years, months, and days.
+ *
+ */
+
+
+
+#include <iostream>
+
+using namespace std;
+
+main () {
+
+	//declare local variables
+	bool valid, validBirthday;
+	int cmonth, cday, cyear;
+	int bmonth, bday, byear;
+	int ageYears, ageMonths, ageDays;
+	char answer;
+
+	//function declarations
+	bool enterDate (int&, int&, int&);
+	bool enterBirthDate (int, int, int, int&, int&, int&);
+	void calculateAge (int, int, int, int, int, int, int&, int&, int&);
+
+	//prompt the user for todays date and invoke the enterDate() function
+	cout << "Please enter today's date, ";
+	valid = enterDate(cmonth, cday, cyear);
+
+	//if validDate() function doesn't recognize a valid date after three tries
+	//the user is alerted
+	if (valid == 0)
+		cout << endl;
+	else
+
+	//if the date was valid show the user the date they entered and ask
+	//if they would like to calculate their age.
+	if (valid == 1) {
+		cout << "Date entered is: " << cmonth << '/' << cday << '/' << cyear << endl;
+
+		cout << "Would you like to see how old you are? (y/n) ";
+		cin >> answer;
+
+		if (answer == 'N' || answer == 'n')
+			cout << "You are so chicken!" << endl;
+		else
+
+		//if the user would like to see their age, call the enterBirthDate
+		//function and assign the return value to the boolean variable
+		//validBirthDate
+		if (answer == 'Y' || answer == 'y') {
+			if (validBirthday = enterBirthDate (cmonth, cday, cyear, bmonth, bday, byear) == 1) {
+
+			cout << "Date entered is: " << bmonth << '/' << bday << '/' << byear << endl; 		
+	
+			//call the calculateAge() function to calculate the user's age
+			calculateAge(bmonth, bday, byear, cmonth, cday, cyear, ageYears, ageMonths, ageDays);
+
+			//display results
+			cout << "You are " << ageYears << " years, " << ageMonths << " months, and " << ageDays << " days old." << endl;
+
+			//display a special result if it is the users birthday
+			if (bmonth == cmonth && bday == cday)
+				cout << "Happy Birthday!" << endl;
+			}
+			
+			else
+				cout << "You have entered an invalid birth day." << endl;
+
+		} //end if answer is yes
+
+		else //if answe is not yes or no
+			cout << "You did not enter 'y' or 'n'" << endl;
+
+
+	} //end if current date is valid
+}
+]0;brookecantwell@storm:~/CISC1600/lab8[brookecantwell@storm lab8]$ cat ageFunction.cpp
+/*
+ * ageFunction.cpp
+ *
+ * Lab #8 - How old are you really?
+ *
+ * Brooke Cantwell
+ *
+ * 27 November 2015
+ *
+ * Functions used in the simple age calculator
+ * age.cpp
+ *
+ */
+
+
+#include <iostream>
+
+using namespace std;
+
+//function definition for enterDate() - the function that prompts
+//the user for input and parses input into months, days, and years
+//and then calls the validDate() function to make sure the entered 
+//date is valid.
+
+bool enterDate (int&month, int&day, int&year) {
+
+	bool valid;
+	int counter = 1;
+	const int MAXGUESSES = 3;
+
+	bool validDate(int&, int&, int&);
+
+	cout << "Please enter the date as MM DD YYYY: ";
+	cin >> month >> day >> year;
+
+	valid = validDate(month, day, year);
+
+	// use the constant MAXGUESSES and the variable counter to
+	// allow the user only three tries to enter a valid date
+	
+	if (valid == 0 && counter < MAXGUESSES) {
+		while (valid == 0 && counter < MAXGUESSES) {
+			counter++;
+			cout << "The entered date is invalid, please re-enter: ";
+			cin >> month >> day >> year;
+			valid = validDate(month, day, year);
+			
+		}
+
+	// if the user reaches the limit of three guesses, alert them
+	// and bring an end to the program
+	
+	cout << "You have reached the limit for invalid dates." << endl;
+	}
+
+	return(valid);
+
+}
+
+// function definition for enterBirthDate() which prompts the user to enter
+// their birthdate and invokes the enterDate() function to parse the input and
+// the dateBefore() function to make sure the entered birth date occurs before
+// the current date entered by the user
+
+bool enterBirthDate (int cmonth, int cday, int cyear, int&bmonth, int&bday, int&byear) {
+
+	bool valid;
+	bool valid2;
+
+	bool dateBefore (int, int, int, int, int, int);
+	bool enterDate (int&, int&, int&);
+
+	cout << "We need to know your date of birth, ";
+
+	// call function enterDate() to prompt the user for input and parse
+	// the input into b(irthday)month, bday, and byear
+
+	valid = enterDate(bmonth, bday, byear);
+
+	//if the birth date entered by the user is a valid date, make sure
+	//that the birth date occurs before the current date supplied by
+	//the user in enterDate()
+
+	if (valid == 1)
+		valid2 = dateBefore(cmonth, cday, cyear, bmonth, bday, byear);
+
+	return(valid2);
+
+}
+
+//function definition for dateBefore() (invoked by enterBirthDate()  which
+//compares variables c(urrent)month cday, and cyear to b(irth)month, bday, 
+//and byear to make sure the birthday occurs before the current date supplied by the user
+
+bool dateBefore (int cmonth, int cday, int cyear, int bmonth, int bday, int byear) {
+
+	bool valid;
+
+
+	//if the birth year is greater than the current year assign the boolean
+	//variable 0 (false) to valid, indicating an invalid birth date
+
+	if (byear > cyear)
+		valid = 0;
+	else
+
+	//if birth year is equal to the current year, perform relational operations
+	//on the bmonth and cmonth variables to determine which date occured first
+
+	if (byear == cyear) {
+
+		//if the birth year and current year are the same, but the birth
+		//month is less than the current month, assign the value of true
+		//to the boolean variable valid
+
+		if (bmonth < cmonth) 
+			valid = 1;
+		else
+
+		//if the bmonth = cmonth perform relational operations on bday and cday
+		if (bmonth == cmonth)
+
+			//if the bday is less than the cday assign true to the boolean variable valid
+			if (bday < cday)
+				valid = 1;
+			else
+				//if the bday is greater than the cday assign the value false to valid
+				valid = 0;
+		else
+
+		//if bmonth is greater than the cmonth and byear is equal to the cyear 
+		//assign false to valid, indicating an invalid birth day
+
+		if (bmonth > cmonth)
+			valid = 0;
+	else
+	//if the cyear is greater than the byear assign the value of false to valid
+	if (byear < cyear)
+		valid = 0;
+	}
+		
+	return(valid);
+}
+
+
+//function definition for validDate() (invoked by enterDate() ) which uses variables of day, month, and year
+//to make sure that the date entered is valid based on month, day, and year variables
+bool validDate (int&month, int&day, int&year) {
+	
+	bool valid;
+
+	//if the month is less than zero or greater than 12 assign the value false to
+	//the boolean variable valid indicating an invalid date
+	if (month < 0 || month > 12)
+		valid = 0;
+
+	else
+	//if the month entered is either April, June, September, or November then
+	//make sure that the day entered is between 0 and 30
+	if (month == 4 || month == 6 || month == 9 || month == 11) {
+		if (day > 0 && day <= 30)
+			valid = 1;
+		else
+			valid = 0;
+	}
+
+	else
+	//if the month entered is January, March, May, July, August, October, or December
+	//then make sure the day entered is between 0 and 31
+	if (month == 1 || month == 3 || month == 5 || month == 7 || month == 8 || month == 10 || month == 12) {
+		if (day > 0 && day < 31)
+			valid = 1;
+		else
+			valid = 0;
+	}	
+	else
+
+	//if the month entered is February, make sure the date falls between 1 and 28
+	if (month == 2) {
+		if (day > 0 && day < 28)
+			valid = 1;
+		else
+			valid = 0;
+	}
+
+	return (valid);	
+}
+
+//function definition for calculareAge(). Invoked by main(), calculate age accept parameters bmonth, bday, byear,
+//cmonth, cday, and cyear (by value) to perform calculations and relational operations to determine age. The parameters
+//ageYears, ageMonths, and ageDays are passed by reference so they can be output in the main() program.
+
+void calculateAge (int bmonth, int bday, int byear, int cmonth, int cday, int cyear, int&ageYears, int&ageMonths, int&ageDays) {
+
+	//calculate age in years
+	ageYears = cyear - byear;
+
+	//calculate age in months
+	
+	//if the birth month is equal to the current month, assign 0 to ageMonths
+	if (bmonth == cmonth)
+		ageMonths = 0;
+
+	else
+
+	//if the birth month is smaller than the current month, assign the value of
+	//cmonth - bmonth to ageMonths
+
+	if (bmonth < cmonth)
+		ageMonths = cmonth - bmonth;
+	else
+
+	//if the birth month is greater than the current month assign the value of
+	//12 - bmonth to ageMonths
+
+	if (bmonth > cmonth)
+		ageMonths = 12 - bmonth;
+
+
+	//Calculate age in days
+
+	//if the birth day is equal to the current day assign the value of 0 to ageDays
+	if (bday == cday)
+		ageDays = 0;
+	else
+
+	//if the birthday is smaller than the current day, assign the value of
+	//cday - bday to ageDays
+
+	if (bday < cday)
+		ageDays = cday - bday;
+	else
+
+	//if the birth day is greater than the current day calculate ageDays by
+	//subtracting the number of days in the birthday month by the value of bday
+
+	if (bday > cday) {
+		if (bmonth == 2)
+			ageDays = 28 - bday;
+		else
+		if (bmonth == 4 || bmonth == 6 || bmonth == 9 || bmonth == 11)
+			ageDays = 30 - bday;
+		else
+		if (bmonth == 1 || bmonth == 3 || bmonth == 5 || bmonth == 7 || bmonth == 8 || bmonth == 10 || bmonth == 12)
+			ageDays = 31 - bday;		
+	}
+}
+]0;brookecantwell@storm:~/CISC1600/lab8[brookecantwell@storm lab8]$ g++ age.cpp ageFunction.cpp -o age
+]0;brookecantwell@storm:~/CISC1600/lab8[brookecantwell@storm lab8]$ ./age
+Please enter today's date, Please enter the date as MM DD YYYY: 11 27 2015
+Date entered is: 11/27/2015
+Would you like to see how old you are? (y/n) y
+We need to know your date of birth, Please enter the date as MM DD YYYY: 10 27 1993
+Date entered is: 10/27/1993
+You are 22 years, 1 months, and 0 days old.
+]0;brookecantwell@storm:~/CISC1600/lab8[brookecantwell@storm lab8]$ exit
+exit
+
+Script done on Fri 27 Nov 2015 10:32:23 PM EST

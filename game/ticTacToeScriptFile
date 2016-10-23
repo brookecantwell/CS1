@@ -1,0 +1,785 @@
+Script started on Sun 20 Dec 2015 08:18:39 PM EST
+]0;brookecantwell@storm:~/CISC1600/game[brookecantwell@storm game]$ pwd
+/home/students/FALL15/brookecantwell/CISC1600/game
+]0;brookecantwell@storm:~/CISC1600/game[brookecantwell@storm game]$ cat game.cpp
+/*
+ *
+ * Tic-Tac-Toe Game
+ *
+ * Brooke Cantwell
+ *
+ * 21 December 2015
+ *
+ * Allows users to play multiple Tic-Tac-Toe 
+ * games and see a scoreboard at the end showing
+ * who won each game, statistics about games won,
+ * and outputting a message depending on who won
+ * the most games or if there was a tie.
+ *
+ */
+
+
+#include <iostream>
+#include <cstdlib>
+#include <ctime>
+//header file
+#include "game2.h"
+
+using namespace std;
+
+main() {
+
+	//local variables
+	const int MAXGAMES = 30;
+	int board[ROW][COL] = {0};
+	int player[numPlayers] = {player1value, player2value};
+	int gameWinner[MAXGAMES] = {0};
+	string name1, name2, player1, player2;
+	string players[numPlayers] = {"Player #1", "Player #2"};
+	string playerNumbers[numPlayers] = {" ", " "};
+	string playerNames[numPlayers] = {name1, name2};
+	char playerChars[numPlayers] = {'X','O'};
+	int rNum;
+	bool win = false;
+	int turns = 0;
+	int winner, player1wins = 0, player2wins = 0;
+	int currentPlayer;
+	char playAgain = 'y';
+	int games = 0;
+	char scoreBoard;
+
+	//function declarations / prototypes
+	void displayBoard(const int[][COL], char[]);
+	int randomNumberGenerator ();
+	void play (int[ ][COL], int, int, int&, string[], string[]);
+	bool checkWinner (const int [][COL], int&);
+	int switchPlayers (int);
+	int determineLoser(int);
+	void clearBoard (int[ ][COL]);
+	void trackScore (int[ ], int, int, int&, int&);
+	void showScoreBoard (int[ ], int, int, int, string[ ], string[ ]);
+
+	cout << "Welcome to Tic Tac Toe in C++!" << endl;
+	
+	//prompt for player names and store them in the playerNames[] array
+	cout << "Enter the name of the first player: ";
+	cin >> playerNames[0];
+
+	cout << "Enter the name of the second player: ";
+	cin >> playerNames[1];
+	
+	//randomize name1 and name2 to player number / x and o
+
+	srand (time(0) );
+
+	rNum = randomNumberGenerator();
+
+	switch (rNum) {
+		case 0:
+			playerNumbers[0] = playerNames[0];
+			playerNumbers[1] = playerNames[1];
+			break;
+		case 1:
+			playerNumbers[0] = playerNames[1];
+			playerNumbers[1] = playerNames[0];
+
+	}
+
+	//use a for loop to display contents of arrays containing player numbers, names, and characters
+	for (int p = 0; p < 2; p++) {
+		cout << players[p] << ": " << playerNumbers[p] << " is " << playerChars[p] << endl;
+	}
+
+	int i = 0;
+
+	while (playAgain == 'y' || playAgain == 'Y' && games < MAXGAMES) {
+		//initialize / reinitialized the turn count to zero
+		turns = 0;
+
+		cout << endl << "GAME #" << games + 1 << '!' << endl;
+
+		displayBoard(board, playerChars);
+
+		while (win == false) {
+
+	 		//prompt the player for the row and column they want to play and store their
+	 		//integer value in that spot in the aray
+			play(board, player[i], i, turns, players, playerNumbers);
+
+			cout << players[i] << " played:" << endl;
+
+			//display the board using 'X' and 'O' characters
+			displayBoard(board, playerChars);
+
+			//check rows, columns, and diagonals for a winner
+			win = checkWinner(board, winner);
+
+			if (win == true) {
+				//use trackScore() to increment either player1wins or player2wins
+				//depending on the winner and store the winner (either 1 or 2) into
+				//the gameWinner[] array using games as the index
+				trackScore(gameWinner, games, winner, player1wins, player2wins);
+				break;
+			}
+			else
+			//if there have been 9 turns and no winner (a tie) break from the loop and ask if the
+			//user wants to play again
+			if (turns >= 9 && !win) {
+				cout << "There has been a tie!" << endl;
+				break;
+			}
+
+			else
+				//switch i to the next play so their integer value is used in the play() function
+				i = switchPlayers(i);	
+
+		}
+
+		//if there was a winner (and not a tie) use determineLoser() to find the loser and set them
+		//to play first during the next game
+		if (win == true) {
+			cout << "Player #" << winner << " won!" << endl;
+			i = determineLoser(winner);
+		}
+	
+		//ask the user if they want to play again
+		cout << "Would you like to play again? (y/n): ";
+		cin >> playAgain;
+
+		//clear the board
+		clearBoard(board);
+
+		win = false;	
+
+		//increment the number of games to use in the gameWinner[] array
+		games++;	
+		
+	} //while play again == y
+
+	//ask the user if they want to see a score board (the number of games won, who won which games, and messages
+	//depending on the number of games won
+	cout << "Would you like to see a score board? (y/n): ";
+	cin >> scoreBoard;
+
+	switch(scoreBoard) {
+		case 'Y':
+		case 'y':
+			showScoreBoard (gameWinner, games, player1wins, player2wins, playerNumbers, players);
+			break;
+		case 'N':
+		case 'n':
+			cout << "OK! Goodbye!" << endl;
+			break;
+
+	}
+
+}
+]0;brookecantwell@storm:~/CISC1600/game[brookecantwell@storm game]$ cat gameFunction.cpp
+/*
+ * Tic-Tac-Toe Functions
+ *
+ * Brooke Cantwell
+ *
+ * 21 December 2015
+ *
+ * Functions used in the Tic Tac Toe
+ * game (game.cpp)
+ *
+ */
+
+
+#include <iostream>
+#include <cstdlib>
+#include <ctime>
+#include "game2.h"
+#include <iomanip>
+
+using namespace std;
+
+
+//function definition for displayBoard(), displays the game board
+//replacing the integers with either X or O depending on the player
+void displayBoard(const int board[][COL], char playerChars[]) {	
+
+	cout << endl << " +---+---+---+" << endl;
+
+	for (int r = 0; r < ROW; r++) {
+
+		for (int c = 0; c < COL; c++) {
+			cout << " | ";			
+
+			if (board[r][c] == player1value)
+				cout << playerChars[0];
+			else 
+			if (board[r][c] == player2value)
+				cout << playerChars[1];
+			else
+				cout << ' ';
+			
+		}
+		cout << " |" << endl << " +---+---+---+" << endl;
+	}
+
+	cout << endl;
+}
+
+//function definition for randomNumberGenerator (determines player numbers)
+int randomNumberGenerator () {
+	int rNum;
+
+	rNum = rand() % 2;
+
+	return(rNum);
+}
+
+
+//function definition for play(), allows players to input the row and column
+//they want to play and alerts them if the numbers are invalid or it the
+//location is already taken
+void play (int board[][COL], int player, int i, int&turns, string players[], string playerNumbers[]) {
+
+	int row, col;
+	char dummyVar;
+
+	cout << players[i] << ": " << playerNumbers[i] << endl;
+	cout << "Enter slot to play in the format ROWxCOLUMN: ";
+	cin >> row >> dummyVar >> col;
+
+	//the the input row or column is larger than the  board, or the position
+	//is already filled, alert the user and ask for another slot
+	if (row > ROW || col > COL) {
+		cout << "That is not a valid position! Please re-enter: ";
+		cin >> row >> dummyVar >> col;
+	}
+	if (board[row-1][col-1] != 0) {
+		cout << "That position is already taken! Please re-enter: ";
+		cin >> row >> dummyVar >> col;
+	}	
+
+	row--;
+	col--;
+	
+	board[row][col] = player;
+
+	turns++;
+
+}
+
+//function definition for checkWinner(), sums up rows, columns, and diagonals
+bool checkWinner (const int board[][COL], int&winner) {
+	int sum = 0;
+	int dSumL = 0, dSumR = 0;
+	bool win = false;	
+
+
+	bool playerCompare (int, int, int&);
+
+	//check diagonal for winner
+	
+	//diagonal left to right
+	for (int r = 0, c = 0; r < ROW; r++, c++) {
+		dSumL += board[r][c];
+	}
+
+	//diagonal right to left
+	for (int r = 0, c = COL-1; c >= 0; r++, c--) {
+		dSumR += board[r][c];
+	}
+	
+
+	//compare to player1sum and player2sum
+	//playerCompare() only work for rows and columns
+	
+	if (dSumL == player1sum || dSumR == player1sum) {
+		win = true;
+		winner = 1;
+	}
+	else
+	if (dSumL == player2sum || dSumR == player2sum) {
+		win = true;
+		winner = 2;
+	}
+	else {
+		win = false;
+	}
+		
+
+	//check rows for winners
+	for (int r= 0; r < ROW && !win; r++) {
+		sum = 0;		
+		for (int c = 0; c < COL; c++) {
+			sum += board[r][c];
+		}		
+	win = playerCompare(sum, win, winner);			
+	}
+
+	//check columns for winners
+
+	for (int c= 0; c < COL && !win; c++) {
+		sum = 0;
+		for (int r = 0; r < ROW; r++) {
+			sum += board[r][c];
+		} 
+	win = playerCompare(sum, win, winner);
+	}
+
+	return(win);
+}
+
+//function definition for playerCompare() used in checkWinner() compares
+//the sum of the rows and colums to player1sum and player1sum, returns the
+//boolean variable win and changes the value of the winner variable
+bool playerCompare (int sum, int win, int&winner) {
+	
+	if (sum == player1sum) {
+		win = true;
+		winner = 1;
+	}
+	else
+	if (sum == player2sum) {
+		win = true;
+		winner = 2;
+	}
+	else
+		win = false;
+
+	return(win);
+
+}
+
+//function definition for switchPlayers(), switches the player
+//after every turn using 0 for player 1 and 1 for player 2 so
+//that the new player variable can be used as an index for the
+//player array
+int switchPlayers (int i) {
+
+	int newPlayer;
+
+	switch (i) {
+		case 0:
+			newPlayer = 1;
+			break;
+		case 1:
+			newPlayer = 0;
+	}
+
+	return(newPlayer);
+}
+
+//determine the lower of the game and set them to play first the next round
+int determineLoser(int winner) {
+	int i;
+
+	if (winner == 1)
+		i = 1;
+	else
+	if (winner == 2)
+		i = 0;
+
+	return(i);
+}
+
+
+//function definition for clearBoard(), resets every slot in the board
+//to zero before the next game
+void clearBoard (int board[][COL]) {
+	for (int r = 0; r < ROW; r++) {
+		for (int c = 0; c < COL; c++)
+			board[r][c] = 0;
+	}
+
+}
+
+//function definition for trackScore(), after a winner is found takes the winner
+//and stores it in the array gameWinner[] with the index game (counter variable) 
+//for showScoreBoard() and  increments the counter for each player when they win
+void trackScore (int gameWinner[], int games, int winner, int&player1wins, int&player2wins) {
+
+	switch(winner) {
+		case 1:
+			player1wins++;
+			gameWinner[games] = 1;
+			break;
+		case 2:
+			player2wins++;	
+			gameWinner[games] = 2;
+	}
+}
+
+
+//function definition for showScoreBoard, outputs the value of the gameWinner[] array
+//so users can see a scoreboard, the number of games won by each player and display a
+//message based on relational operations between the number of games won by each player	
+
+void showScoreBoard (int gameWinner[], int games, int player1wins, int player2wins, string playerNumbers[], string players[]) {
+
+	int mostWins;
+
+	cout << endl << "Score Board and Game Summary: " << endl << endl;
+
+	//use a loop to output player numbers and names	
+	for (int p = 0; p < 2; p++) {
+		cout << players[p] << ": " << playerNumbers[p] << endl;
+	}
+
+	cout << endl << "Game\tWinner" << endl;
+	cout << "--------------------" << endl;
+
+	//use a loop to output the winner of each game that was played, or output
+	//'tie' if there was no winner (aka gameWinner[i] == 0)
+	for (int i = 0; i < games; i++) {
+		if (gameWinner[i] != 0) {
+			cout << i+1 << "\t("  << gameWinner[i] << "): ";
+				if (gameWinner[i] == 1)
+					cout << playerNumbers[0] << endl;
+				else
+					cout << playerNumbers[1] << endl;
+		}
+		else
+			cout << i+1 << '\t' << "Tie" << endl;
+	}
+
+	//display the number of games won by each player
+	cout << endl << "Games Won:" << endl << "----------" << endl;
+	cout << playerNumbers[0] << ": " << player1wins << endl;
+	cout << playerNumbers[1] << ": " << player2wins << endl << endl;
+
+	//determine who won the most games and use that variable to decide which
+	//player index is used in the congratulations statement
+	if (player1wins != player2wins) {
+		if (player1wins > player2wins)
+			mostWins = 0;
+		else
+			mostWins = 1;
+
+		cout << "Congratulations " << playerNumbers[mostWins] << " (" << players[mostWins] << ") you won the most games!" << endl;
+
+	}
+	else
+	//if there is a tie let the players know
+	if (player1wins == player2wins)
+		cout << "Looks like an even match up! " << playerNumbers[0] << " and " << playerNumbers[1] << " won the same number of games!" << endl;
+	
+}
+
+]0;brookecantwell@storm:~/CISC1600/game[brookecantwell@storm game]$ cat game2.h
+/* Header File - Tic Tac Toe Game
+ *
+ * Brooke Cantwell
+ *
+ * 21 December 2015
+ *
+ * Header file for the Tic Tac Toe game
+ * used in game.cpp and gameFunction.cpp
+ *
+ */
+
+
+
+#ifndef GAME_H
+#define GAME_H
+
+const int ROW = 3, COL = 3;
+const int numPlayers = 2;
+const int player1value = 3; 
+const int player2value = -3;
+const int player1sum = 9, player2sum = -9;
+
+#endif
+]0;brookecantwell@storm:~/CISC1600/game[brookecantwell@storm game]$ g++ game.cpp gameFunction.cpp -o game
+]0;brookecantwell@storm:~/CISC1600/game[brookecantwell@storm game]$ ./game
+Welcome to Tic Tac Toe in C++!
+Enter the name of the first player: Jane
+Enter the name of the second player: John
+Player #1: Jane is X
+Player #2: John is O
+
+GAME #1!
+
+ +---+---+---+
+ |   |   |   |
+ +---+---+---+
+ |   |   |   |
+ +---+---+---+
+ |   |   |   |
+ +---+---+---+
+
+Player #1: Jane
+Enter slot to play in the format ROWxCOLUMN: 1x1
+Player #1 played:
+
+ +---+---+---+
+ | X |   |   |
+ +---+---+---+
+ |   |   |   |
+ +---+---+---+
+ |   |   |   |
+ +---+---+---+
+
+Player #2: John
+Enter slot to play in the format ROWxCOLUMN: 1x2
+Player #2 played:
+
+ +---+---+---+
+ | X | O |   |
+ +---+---+---+
+ |   |   |   |
+ +---+---+---+
+ |   |   |   |
+ +---+---+---+
+
+Player #1: Jane
+Enter slot to play in the format ROWxCOLUMN: 2x2
+Player #1 played:
+
+ +---+---+---+
+ | X | O |   |
+ +---+---+---+
+ |   | X |   |
+ +---+---+---+
+ |   |   |   |
+ +---+---+---+
+
+Player #2: John
+Enter slot to play in the format ROWxCOLUMN: 2x1
+Player #2 played:
+
+ +---+---+---+
+ | X | O |   |
+ +---+---+---+
+ | O | X |   |
+ +---+---+---+
+ |   |   |   |
+ +---+---+---+
+
+Player #1: Jane
+Enter slot to play in the format ROWxCOLUMN: 3x3
+Player #1 played:
+
+ +---+---+---+
+ | X | O |   |
+ +---+---+---+
+ | O | X |   |
+ +---+---+---+
+ |   |   | X |
+ +---+---+---+
+
+Player #1 won!
+Would you like to play again? (y/n): y
+
+GAME #2!
+
+ +---+---+---+
+ |   |   |   |
+ +---+---+---+
+ |   |   |   |
+ +---+---+---+
+ |   |   |   |
+ +---+---+---+
+
+Player #2: John
+Enter slot to play in the format ROWxCOLUMN: 1x1
+Player #2 played:
+
+ +---+---+---+
+ | O |   |   |
+ +---+---+---+
+ |   |   |   |
+ +---+---+---+
+ |   |   |   |
+ +---+---+---+
+
+Player #1: Jane
+Enter slot to play in the format ROWxCOLUMN: 2x1
+Player #1 played:
+
+ +---+---+---+
+ | O |   |   |
+ +---+---+---+
+ | X |   |   |
+ +---+---+---+
+ |   |   |   |
+ +---+---+---+
+
+Player #2: John
+Enter slot to play in the format ROWxCOLUMN: 3x1
+Player #2 played:
+
+ +---+---+---+
+ | O |   |   |
+ +---+---+---+
+ | X |   |   |
+ +---+---+---+
+ | O |   |   |
+ +---+---+---+
+
+Player #1: Jane
+Enter slot to play in the format ROWxCOLUMN: 2x2
+Player #1 played:
+
+ +---+---+---+
+ | O |   |   |
+ +---+---+---+
+ | X | X |   |
+ +---+---+---+
+ | O |   |   |
+ +---+---+---+
+
+Player #2: John
+Enter slot to play in the format ROWxCOLUMN: 2x3
+Player #2 played:
+
+ +---+---+---+
+ | O |   |   |
+ +---+---+---+
+ | X | X | O |
+ +---+---+---+
+ | O |   |   |
+ +---+---+---+
+
+Player #1: Jane
+Enter slot to play in the format ROWxCOLUMN: 1x2
+Player #1 played:
+
+ +---+---+---+
+ | O | X |   |
+ +---+---+---+
+ | X | X | O |
+ +---+---+---+
+ | O |   |   |
+ +---+---+---+
+
+Player #2: John
+Enter slot to play in the format ROWxCOLUMN: 3x2
+Player #2 played:
+
+ +---+---+---+
+ | O | X |   |
+ +---+---+---+
+ | X | X | O |
+ +---+---+---+
+ | O | O |   |
+ +---+---+---+
+
+Player #1: Jane
+Enter slot to play in the format ROWxCOLUMN: 3x3
+Player #1 played:
+
+ +---+---+---+
+ | O | X |   |
+ +---+---+---+
+ | X | X | O |
+ +---+---+---+
+ | O | O | X |
+ +---+---+---+
+
+Player #2: John
+Enter slot to play in the format ROWxCOLUMN: 1x3
+Player #2 played:
+
+ +---+---+---+
+ | O | X | O |
+ +---+---+---+
+ | X | X | O |
+ +---+---+---+
+ | O | O | X |
+ +---+---+---+
+
+There has been a tie!
+Would you like to play again? (y/n): y
+
+GAME #3!
+
+ +---+---+---+
+ |   |   |   |
+ +---+---+---+
+ |   |   |   |
+ +---+---+---+
+ |   |   |   |
+ +---+---+---+
+
+Player #2: John
+Enter slot to play in the format ROWxCOLUMN: 1x1
+Player #2 played:
+
+ +---+---+---+
+ | O |   |   |
+ +---+---+---+
+ |   |   |   |
+ +---+---+---+
+ |   |   |   |
+ +---+---+---+
+
+Player #1: Jane
+Enter slot to play in the format ROWxCOLUMN: 1x3
+Player #1 played:
+
+ +---+---+---+
+ | O |   | X |
+ +---+---+---+
+ |   |   |   |
+ +---+---+---+
+ |   |   |   |
+ +---+---+---+
+
+Player #2: John
+Enter slot to play in the format ROWxCOLUMN: 2x1
+Player #2 played:
+
+ +---+---+---+
+ | O |   | X |
+ +---+---+---+
+ | O |   |   |
+ +---+---+---+
+ |   |   |   |
+ +---+---+---+
+
+Player #1: Jane
+Enter slot to play in the format ROWxCOLUMN: 2x2
+Player #1 played:
+
+ +---+---+---+
+ | O |   | X |
+ +---+---+---+
+ | O | X |   |
+ +---+---+---+
+ |   |   |   |
+ +---+---+---+
+
+Player #2: John
+Enter slot to play in the format ROWxCOLUMN: 3x1
+Player #2 played:
+
+ +---+---+---+
+ | O |   | X |
+ +---+---+---+
+ | O | X |   |
+ +---+---+---+
+ | O |   |   |
+ +---+---+---+
+
+Player #2 won!
+Would you like to play again? (y/n): n
+Would you like to see a score board? (y/n): y
+
+Score Board and Game Summary: 
+
+Player #1: Jane
+Player #2: John
+
+Game	Winner
+--------------------
+1	(1): Jane
+2	Tie
+3	(2): John
+
+Games Won:
+----------
+Jane: 1
+John: 1
+
+Looks like an even match up! Jane and John won the same number of games!
+]0;brookecantwell@storm:~/CISC1600/game[brookecantwell@storm game]$ exit
+exit
+
+Script done on Sun 20 Dec 2015 08:20:45 PM EST
